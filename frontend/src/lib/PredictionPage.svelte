@@ -23,38 +23,6 @@
         model: string;
     };
 
-
-function savePrediction(data: PredictionResult, payload: Record<string, string | number>) {
-    const storageKey = 'foodwise_prediction_history';
-
-    const existing = JSON.parse(
-        localStorage.getItem(storageKey) || '[]'
-    );
-
-    const newRecord = {
-        id: crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-        date: form.date,
-        meals_served: payload.meals_served,
-        kitchen_staff: payload.kitchen_staff,
-        temperature_C: payload.temperature_C,
-        humidity_percent: payload.humidity_percent,
-        past_waste_kg: payload.past_waste_kg,
-        staff_experience: payload.staff_experience,
-        waste_category: payload.waste_category,
-        special_event: payload.special_event,
-        predicted_food_waste_kg: data.predicted_food_waste_kg,
-        unit: data.unit,
-        model: data.model
-    };
-
-    localStorage.setItem(
-        storageKey,
-        JSON.stringify([newRecord, ...existing])
-    );
-}
-
-
     function todayString() {
         const today = new Date();
         const year = today.getFullYear();
@@ -149,7 +117,7 @@ function savePrediction(data: PredictionResult, payload: Record<string, string |
         loading = true;
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/predict', {
+            const response = await fetch('https://foodwise-ai-api-88911246605.asia-south1.run.app/predict', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -170,7 +138,7 @@ function savePrediction(data: PredictionResult, payload: Record<string, string |
             }
 
             result = data;
-            savePrediction(data, payload);
+            
         } catch (error) {
             errorMessage =
                 error instanceof Error

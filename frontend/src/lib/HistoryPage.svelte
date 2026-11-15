@@ -11,6 +11,9 @@
         Info
     } from 'lucide-svelte';
 
+    const API_BASE_URL =
+        'https://foodwise-ai-api-88911246605.asia-south1.run.app';
+
     type HistoryRecord = {
         id: string;
         created_at: string;
@@ -31,18 +34,49 @@
     let records = $state<HistoryRecord[]>([]);
     let searchQuery = $state('');
     let selectedCategory = $state('all');
+    let loading = $state(true);
+    let errorMessage = $state('');
 
     onMount(() => {
         loadHistory();
     });
 
-    function loadHistory() {
+    async function loadHistory() {
+        loading = true;
+        errorMessage = '';
+
         try {
-            records = JSON.parse(
-                localStorage.getItem('foodwise_prediction_history') || '[]'
-            );
-        } catch {
-            records = [];
+            const response = await fetch(`${API_BASE_URL}/history`);
+
+            if (!response.ok) {
+                throw new Error('Unable to retrieve prediction history.');
+            }
+
+            const data = await response.json();
+
+            records = data.history.map((item: any) => ({
+                id: item.id,
+                created_at: item.created_at,
+                date: item.created_at,
+                meals_served: item.input_data.meals_served,
+                kitchen_staff: item.input_data.kitchen_staff,
+                temperature_C: item.input_data.temperature_C,
+                humidity_percent: item.input_data.humidity_percent,
+                past_waste_kg: item.input_data.past_waste_kg,
+                staff_experience: item.input_data.staff_experience,
+                waste_category: item.input_data.waste_category,
+                special_event: item.input_data.special_event,
+                predicted_food_waste_kg: item.predicted_food_waste_kg,
+                unit: item.unit,
+                model: item.model
+            }));
+        } catch (error) {
+            errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : 'Unable to connect to the history API.';
+        } finally {
+            loading = false;
         }
     }
 
@@ -51,7 +85,7 @@
             const query = searchQuery.toLowerCase();
 
             const matchesSearch =
-                record.date.includes(query) ||
+                record.date.toLowerCase().includes(query) ||
                 record.waste_category.toLowerCase().includes(query) ||
                 String(record.meals_served).includes(query);
 
@@ -63,32 +97,66 @@
         })
     );
 
-    function deleteRecord(id: string) {
-        records = records.filter((record) => record.id !== id);
+    async function deleteRecord(id: string) {
+        errorMessage = '';
 
-        localStorage.setItem(
-            'foodwise_prediction_history',
-            JSON.stringify(records)
-        );
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/history/${encodeURIComponent(id)}`,
+                { method: 'DELETE' }
+            );
+
+            if (!response.ok) {
+                throw new Error('Unable to delete this prediction.');
+            }
+
+            records = records.filter((record) => record.id !== id);
+        } catch (error) {
+            errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : 'Unable to delete prediction.';
+        }
     }
 
-    function clearHistory() {
+    async function clearHistory() {
         if (records.length === 0) return;
 
-        if (window.confirm('Are you sure you want to delete all prediction history?')) {
-            records = [];
-            localStorage.removeItem('foodwise_prediction_history');
+        if (
+            window.confirm(
+                'Are you sure you want to delete all prediction history?'
+            )
+        ) {
+            errorMessage = '';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/history`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Unable to clear prediction history.');
+                }
+
+                records = [];
+            } catch (error) {
+                errorMessage =
+                    error instanceof Error
+                        ? error.message
+                        : 'Unable to clear prediction history.';
+            }
         }
     }
 
     function formatDate(date: string) {
-        return new Date(`${date}T00:00:00`).toLocaleDateString('en-IN', {
+        return new Date(date).toLocaleDateString('en-IN', {
             day: 'numeric',
             month: 'short',
             year: 'numeric'
         });
     }
 </script>
+
 
 <svelte:head>
     <title>Prediction History | FoodWise AI</title>
@@ -149,7 +217,7 @@
         <div class="history-heading">
             <div>
                 <h2>Saved Predictions</h2>
-                <p>{records.length} record(s) saved in this browser</p>
+                <p>{records.length} record(s) saved in Firestore</p>
             </div>
         </div>
 
@@ -191,7 +259,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Prediction Date</th>
+                            <th>Saved Date</th>
                             <th>Meals Served</th>
                             <th>Category</th>
                             <th>Predicted Waste</th>
@@ -242,10 +310,9 @@
     <div class="history-note">
         <Info size={17} />
         <p>
-            Prediction records are stored in this browser's local storage.
-            Clearing browser data or using another browser may remove or hide
-            these records.
-        </p>
+    Prediction records are stored centrally in Google Cloud Firestore.
+    The shared history is accessible across visitors and browsers.
+       </p>
     </div>
 </section>
 
