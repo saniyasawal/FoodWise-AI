@@ -22,12 +22,14 @@ app = FastAPI(
 )
 
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:4173",
-        "https://food-wise-52yf6k4bi-saniyasawal.vercel.app"
+        "https://food-wise-52yf6k4bi-saniyasawal.vercel.app",
+        "https://food-wise-ai-rose.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
