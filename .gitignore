@@ -1,0 +1,64 @@
+
+# -------------------------
+# Python
+# -------------------------
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# -------------------------
+# Jupyter Notebook
+# -------------------------
+.ipynb_checkpoints/
+
+# -------------------------
+# Environment variables and secrets
+# -------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+service-account*.json
+credentials*.json
+
+# -------------------------
+# Frontend - SvelteKit / Node
+# -------------------------
+frontend/node_modules/
+frontend/.svelte-kit/
+frontend/build/
+frontend/dist/
+frontend/.vercel/
+frontend/.vite/
+frontend/.env
+frontend/.env.*
+
+# -------------------------
+# Logs and temporary files
+# -------------------------
+*.log
+*.tmp
+*.temp
+
+# -------------------------
+# Operating system
+# -------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -------------------------
+# Editors
+# -------------------------
+.vscode/
+.idea/

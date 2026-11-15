@@ -1,0 +1,27 @@
+{
+    "model_name": "Linear Regression",
+    "model_version": "1.0",
+    "target_variable": "food_waste_kg",
+    "evaluation_method": "Chronological 80:20 split",
+    "training_records": 737,
+    "testing_records": 174,
+    "mae": 4.802563273953297,
+    "rmse": 7.361438446724944,
+    "r2_score": 0.920257946842365,
+    "features": [
+        "meals_served",
+        "kitchen_staff",
+        "temperature_C",
+        "humidity_percent",
+        "day_of_week",
+        "special_event",
+        "past_waste_kg",
+        "staff_experience",
+        "waste_category",
+        "month",
+        "day_of_month"
+    ],
+    "training_date": "2026-11-15T16:56:56.349360",
+    "python_version": "3.14.8",
+    "sklearn_version": "1.9.1"
+}
